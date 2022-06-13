@@ -161,18 +161,18 @@ const Menu = ({ menu_name, id, code }) => {
                     })
                     setConfirmDelete(true)
                   }}
-                  className='cursor-pointer mb-2 text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-2'>Delete Menu</button>
+                  className='cursor-pointer mb-2 text-xs md:text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-1 px-2 md:p-2'>Delete Menu</button>
                 <button
                   onClick={() => {
                     setOpenCategoryModal(true)
                   }}
-                  className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new Category</button>
+                  className='cursor-pointer text-xs md:text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-1 px-2 md:p-2'>Create a new Category</button>
               </div>
             </div>
-            <div className='flex'>
+            <div className='flex md:flex-row flex-col mt-4 '>
               {menu && menu.categories.map((category) => {
                 return (
-                  <div className=' p-4 shadow w-64 rounded-lg border mr-4 '>
+                  <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
                     <div className='w-full flex'>
                       <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
 

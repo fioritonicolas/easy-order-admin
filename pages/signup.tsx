@@ -1,3 +1,4 @@
+import { setCookies } from 'cookies-next'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
@@ -18,8 +19,17 @@ const Home: NextPage = () => {
 }
 
 export default Home
+import { Fragment, useState } from 'react'
+import { Listbox, Transition } from '@headlessui/react'
+import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
+import { useRouter } from 'next/router'
+
 
 function SignInForm() {
+  const roles = [
+    { name: 'Admin' },
+  ]
+  const router = useRouter()
   const [role, setRole] = useState(roles[0])
   const [firstName,setFirstName] = useState('')
   const [lastName,setLastName] = useState('')
@@ -56,6 +66,30 @@ function SignInForm() {
     if(data.message=="User already exists"){
       setErrorMessage("User already exists")
     }
+    else{
+      let res = await fetch(process.env.NEXT_PUBLIC_API_URL+"auth/login",{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "email": email,
+          "password": password
+        })
+      })
+      let data = await res.json()
+      if(data.message){
+        if(data.message=="You are not authorized"){
+          // console.log(data.message)
+          setErrorMessage(data.message)
+        }
+      }
+      else{
+      setCookies("accessToken",data.token.accessToken)
+      setCookies("refreshToken",data.token.refreshToken)
+      router.push("/dashboard")
+    }
+  }
 
   }
 
@@ -324,14 +358,6 @@ function SignInForm() {
   )
 }
 
-
-import { Fragment, useState } from 'react'
-import { Listbox, Transition } from '@headlessui/react'
-import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
-
-const roles = [
-  { name: 'Admin' },
-]
 
 
 
