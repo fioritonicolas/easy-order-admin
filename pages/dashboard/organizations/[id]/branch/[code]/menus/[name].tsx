@@ -7,15 +7,15 @@ import { CreateMenuModal } from '../../../../../../../components/modals/CreateMe
 import { CreateItemModal } from '../../../../../../../components/modals/CreateItemModal'
 import { PencilAltIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/react/outline'
 import { setMenu, removeItem } from '../../../../../../../store/slices/menuSlice'
-import { selectCounter,setValue,incrementValue } from '../../../../../../../store/slices/counterSlice'
+import { selectCounter, setValue, incrementValue } from '../../../../../../../store/slices/counterSlice'
 
 import { useDispatch, useSelector } from 'react-redux'
 
 const Menu = ({ menu_name, id, code }) => {
   const router = useRouter()
   const dispatch = useDispatch()
-  const {value} = useSelector((state) => state.counter)
-  const {menu} = useSelector((state) => state.menu)
+  const { value } = useSelector((state) => state.counter)
+  const { menu } = useSelector((state) => state.menu)
   const [openCategoryModal, setOpenCategoryModal] = useState(false)
   const [openItemMenu, setOpenItemMenu] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -153,38 +153,41 @@ const Menu = ({ menu_name, id, code }) => {
             <div className='flex'>
               <h1 className="text-3xl font-semibold text-gray-900">Categories</h1>
               <div className='ml-auto flex flex-col'>
-              <button
-                onClick={() => {
-                  setDeleteItem({
-                    type: "menu",
-                    item: menu
-                  })
-                  setConfirmDelete(true)
-                }}
-                className='cursor-pointer mb-2 text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-2'>Delete Menu</button>
-              <button
-                onClick={() => {
-                  setOpenCategoryModal(true)
-                }}
-                className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new Category</button>
-                </div>
+                <button
+                  onClick={() => {
+                    setDeleteItem({
+                      type: "menu",
+                      item: menu
+                    })
+                    setConfirmDelete(true)
+                  }}
+                  className='cursor-pointer mb-2 text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-2'>Delete Menu</button>
+                <button
+                  onClick={() => {
+                    setOpenCategoryModal(true)
+                  }}
+                  className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new Category</button>
+              </div>
             </div>
             <div className='flex'>
               {menu && menu.categories.map((category) => {
                 return (
                   <div className=' p-4 shadow w-64 rounded-lg border mr-4 '>
                     <div className='w-full flex'>
-                    <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
-                    <XCircleIcon
-                                  onClick={() => {
-                                    setDeleteItem({
-                                      "item": category,
-                                      "type": "category"
-                                    })
-                                    setConfirmDelete(true)
-                                  }}
-                                  className='ml-auto my-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
+                      <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
+
+                      <XCircleIcon
+                        onClick={() => {
+                          setDeleteItem({
+                            "item": category,
+                            "type": "category"
+                          })
+                          setConfirmDelete(true)
+                        }}
+                        className='ml-auto my-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
+
                     </div>
+                    {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
                     <ul>
                       {category.items.map((item) => {
                         return (
@@ -192,7 +195,7 @@ const Menu = ({ menu_name, id, code }) => {
                             <li className='flex'>
                               <div className=' pt-2 pr-2'>
                                 <div className='font-semibold text-lg'>{item.name}</div>
-                                
+
                               </div>
                               <div className='flex pl-2 pt-2 pr-2 w-full'>
                                 <span className=' pt-0.5'>${item.price}</span>
@@ -209,6 +212,7 @@ const Menu = ({ menu_name, id, code }) => {
                               </div>
                             </li>
                             <div className=''>{item.description}</div>
+                            <img src={item.picture} className="max-w-16 max-h-16"></img>
                           </div>
                         )
                       })}
