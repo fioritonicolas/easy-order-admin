@@ -25,6 +25,20 @@ const Menu = ({ menu_name, id, code }) => {
   const [categoryId, setCategoryId] = useState(null)
   const [active, setActive] = useState(false)
   const [deleteItem, setDeleteItem] = useState(null)
+  const [editedItem, setEditedItem] = useState(null)
+  const [editedCategory, setEditedCategory] = useState(null)
+
+  async function editItem(item) {
+    console.log(item)
+    setEditedItem(item)
+    setOpenItemMenu(true)
+  }
+  async function editCategory(category) {
+    console.log(category)
+    setEditedCategory(category)
+    setOpenCategoryModal(true)
+  }
+
   function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
   }
@@ -36,23 +50,28 @@ const Menu = ({ menu_name, id, code }) => {
         "Organization": id
       }
     })
-    let data = await res.json()
-    let branches = data.branches
-    let test = branches.forEach((branch) => {
-      if (branch.code == code) {
-        setBranch(branch)
-        setMenus(branch.menus)
-        branch.menus.forEach((item) => {
-          if (item.name == menu_name) {
-            dispatch(setMenu(item))
-            setActive(item.active)
-          }
-        })
-      }
-    })
+    if (res.status == 401) {
+      router.push("/")
+    }
+    else {
+      let data = await res.json()
+      console.log(data)
+      let branches = data.branches
+      let test = branches.forEach((branch) => {
+        if (branch.code == code) {
+          setBranch(branch)
+          setMenus(branch.menus)
+          branch.menus.forEach((item) => {
+            if (item.name == menu_name) {
+              dispatch(setMenu(item))
+              setActive(item.active)
+            }
+          })
+        }
+      })
+    }
   }
   useEffect(() => {
-
     fetchBranches()
   }, [])
 
@@ -60,17 +79,19 @@ const Menu = ({ menu_name, id, code }) => {
     console.log("Deleting!")
     console.log(data)
     if (data.type == "menu") {
-      // let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category/" + data.item.id, {
-      //   method: "DELETE",
-      //   headers: {
-      //     "Authorization": "Bearer " + getCookie("accessToken"),
-      //     "Content-Type": "application/json",
-      //     "Organization": id
-      //   }
-      // })
-      // let data_res = await result.status
-      // console.log(data_res)
-      // fetchBranches()
+      
+      let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/" + data.item.id, {
+        method: "DELETE",
+        headers: {
+          "Authorization": "Bearer " + getCookie("accessToken"),
+          "Content-Type": "application/json",
+          "Organization": id
+        }
+      })
+      let data_res = await result.status
+      console.log(data_res)
+      router.back()
+      fetchBranches()
     }
     else if (data.type == "category") {
       let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category/" + data.item.id, {
@@ -87,9 +108,11 @@ const Menu = ({ menu_name, id, code }) => {
       // dispatch(removeItem(data.item.id))
     }
     else if (data.type == "item") {
+      console.log("Sending delete request!")
       console.log(data)
-      console.log(data.item.id)
-      let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/" + data.item.id, {
+      let item_id = data.item.id
+      
+      let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/" + item_id, {
         method: "DELETE",
         headers: {
           "Authorization": "Bearer " + getCookie("accessToken"),
@@ -99,7 +122,8 @@ const Menu = ({ menu_name, id, code }) => {
       })
       let data_res = await result.status
       console.log(data_res)
-      dispatch(removeItem(data.item.id))
+      dispatch(removeItem(item_id))
+      setEditedItem(null)
 
       return data_res
     }
@@ -123,8 +147,11 @@ const Menu = ({ menu_name, id, code }) => {
     <>
       {menu && (
         <div className='p-8'>
-          <CreateItemModal id={id} categoryId={categoryId} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>
-          <CreateCategoryModal fetchBranches={fetchBranches} id={id} menuId={menu.id} isOpen={openCategoryModal} setIsOpen={setOpenCategoryModal}></CreateCategoryModal>
+          <CreateItemModal id={id} item={editedItem} categoryId={categoryId} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>
+          <CreateCategoryModal
+            item={editedCategory}
+            setItem={setEditedCategory}
+            fetchBranches={fetchBranches} id={id} menuId={menu.id} isOpen={openCategoryModal} setIsOpen={setOpenCategoryModal}></CreateCategoryModal>
           {deleteItem && <DeleteDialog data={deleteItem} handleDelete={handleDelete} isOpen={confirmDelete} setIsOpen={setConfirmDelete}></DeleteDialog>}
           <h1 className=' text-5xl font-bold'>{menu_name}</h1>
           <div className='flex mt-3'>
@@ -164,6 +191,7 @@ const Menu = ({ menu_name, id, code }) => {
                   className='cursor-pointer mb-2 text-xs md:text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-1 px-2 md:p-2'>Delete Menu</button>
                 <button
                   onClick={() => {
+                    setEditedCategory(null)
                     setOpenCategoryModal(true)
                   }}
                   className='cursor-pointer text-xs md:text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-1 px-2 md:p-2'>Create a new Category</button>
@@ -175,7 +203,11 @@ const Menu = ({ menu_name, id, code }) => {
                   <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
                     <div className='w-full flex'>
                       <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
-
+                      <PencilAltIcon
+                        onClick={() => {
+                          editCategory(category)
+                        }}
+                        className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
                       <XCircleIcon
                         onClick={() => {
                           setDeleteItem({
@@ -185,7 +217,6 @@ const Menu = ({ menu_name, id, code }) => {
                           setConfirmDelete(true)
                         }}
                         className='ml-auto my-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
-
                     </div>
                     {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
                     <ul>
@@ -199,9 +230,15 @@ const Menu = ({ menu_name, id, code }) => {
                               </div>
                               <div className='flex pl-2 pt-2 pr-2 w-full'>
                                 <span className=' pt-0.5'>${item.price}</span>
-                                <PencilAltIcon className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
+                                <PencilAltIcon
+                                  onClick={() => {
+                                    editItem(item)
+                                  }}
+                                  className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
                                 <XCircleIcon
                                   onClick={() => {
+                                    console.log("Setting delete Item")
+                                    console.log(item)
                                     setDeleteItem({
                                       "item": item,
                                       "type": "item"
@@ -219,9 +256,11 @@ const Menu = ({ menu_name, id, code }) => {
                       <button
                         onClick={() => {
                           setCategoryId(category.id)
+                          setEditedItem(null)
                           setOpenItemMenu(true)
                         }}
-                        className='flex mt-2 bg-blue-100 p-1 rounded-lg'><PlusCircleIcon className='w-6 h-6 my-auto mr-2'></PlusCircleIcon> Add an item</button>
+                        className='flex mt-2 bg-blue-100 p-1 rounded-lg'>
+                        <PlusCircleIcon className='w-6 h-6 my-auto mr-2'></PlusCircleIcon> Add an item</button>
                     </ul>
                   </div>
                 )
@@ -254,7 +293,6 @@ export const getServerSideProps = async (ctx) => {
 function DeleteDialog({ data, isOpen, setIsOpen, handleDelete }) {
   // Menu, item, category
   // data.type="menu"
-  console.log("Delete data: ", data)
 
   return (
     <Transition appear show={isOpen} as={Fragment}>

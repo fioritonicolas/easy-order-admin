@@ -1,14 +1,62 @@
 import { Dialog, Transition } from "@headlessui/react"
 import { getCookie } from "cookies-next"
-import { Fragment, useState } from "react"
+import { useRouter } from "next/router"
+import { Fragment, useEffect, useRef, useState } from "react"
+import { FileDrop } from 'react-file-drop'
+import { useDispatch } from "react-redux"
+import {editCategory} from '../../store/slices/menuSlice'
 
-export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOpen }) {
+export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOpen, item, setItem }) {
+  const router = useRouter()
+  const dispatch = useDispatch()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [picture, setPicture] = useState('')
   const [isRendered, setIsRendered] = useState(false)
   const [rendered, setRendered] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef(null);
+
+  const onFileInputChange = (event) => {
+    const { files } = event.target;
+    // do something with your files...
+  }
+  useEffect(() => {
+    console.log("item")
+    if (item) {
+      console.log("Edited category", item)
+      setName(item.name)
+      setDescription(item.description)
+      setPicture(item.picture)
+      setIsRendered(item.isRendered)
+      // setPrice(item.price)
+    }
+  }, [item])
+
+  async function handleFiles(files) {
+    let extension = files[0].name.split(".")[1]
+    const formData = new FormData();
+    let test = await fetch(process.env.NEXT_PUBLIC_API_URL + "organization/presigned-file-url?extension=" + extension, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + getCookie('accessToken'),
+        "Organization": id
+      }
+    })
+    let data = await test.json()
+    let put_url = data.url
+    formData.append('file', files[0]);
+    const response = await fetch(put_url, {
+      method: "PUT",
+      body: files[0],
+      headers: {
+        'Content-Type': '',
+      }
+    });
+    let image_url = put_url.split("?")[0]
+    setPicture(image_url)
+  }
 
   async function submitForm() {
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category", {
@@ -30,10 +78,54 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
     console.log(data)
     fetchBranches()
   }
+  async function submitEditForm() {
+    dispatch(editCategory({
+      id: item.id,
+      name,
+      items: item.items,
+      description,
+      picture: picture,
+      isRendered,
+      sortOrder: item.sortOrder
+    }))
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category/"+item.id, {
+      method: 'PATCH',
+      headers: {
+        "Authorization": "Bearer " + getCookie("accessToken"),
+        'Content-Type': 'application/json',
+        "Organization": id
+      },
+      body: JSON.stringify({
+        name,
+        description,
+        picture: picture,
+        isRendered
+      })
+    })
+    if(res.status==401){
+      router.push("/")
+    }
+    else{
+    
+    console.log(res.statusText)
+  }
+
+  }
+
+  function clearValues() {
+    setItem(null)
+    setPicture('')
+    setDragOver(false)
+
+    setName('')
+    setDescription('')
+    setIsRendered(false)
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={() => {
+        clearValues()
         setIsOpen(false)
       }}>
         <Transition.Child
@@ -72,6 +164,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                       Name
                     </label>
                     <input
+                      value={name}
                       onChange={(e) => {
                         setName(e.target.value)
                       }}
@@ -92,6 +185,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                     </label>
                     <div className="mt-1">
                       <textarea
+                        value={description}
                         onChange={(e) => {
                           setDescription(e.target.value)
                         }}
@@ -114,61 +208,58 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                 </> :
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Cover photo</label>
-                    <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                      <div className="space-y-1 text-center">
-                        <svg
-                          className="mx-auto h-12 w-12 text-gray-400"
-                          stroke="currentColor"
-                          fill="none"
-                          viewBox="0 0 48 48"
-                          aria-hidden="true"
-                        >
-                          <path
-                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                        <div className="flex text-sm text-gray-600">
-                          <label
-                            htmlFor="file-upload"
-                            className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                    <FileDrop
+                      onDragOver={() => {
+                        console.log("drag over")
+                        setDragOver(true)
+                      }}
+                      onDragLeave={() => {
+                        setDragOver(false)
+                      }}
+                      onDrop={(files) => {
+                        handleFiles(files)
+                      }}>
+                      <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md ${dragOver && " bg-indigo-200"}`}>
+                        <div className="space-y-1 text-center">
+                          <svg
+                            className="mx-auto h-12 w-12 text-gray-400"
+                            stroke="currentColor"
+                            fill="none"
+                            viewBox="0 0 48 48"
+                            aria-hidden="true"
                           >
-                            <span>Upload a file</span>
-                            <input
-                              onChange={async (e) => {
-                                const formData = new FormData();
-                                let extension = e.target.files[0].name.split(".")[1]
-                                let test = await fetch(process.env.NEXT_PUBLIC_API_URL + "organization/presigned-file-url?extension=" + extension, {
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + getCookie('accessToken'),
-                                    "Organization": id
-                                  }
-                                })
-                                let data = await test.json()
-                                let put_url = data.url
-                                formData.append('file', e.target.files[0]);
-                                const response = await fetch(put_url, {
-                                  method: "PUT",
-                                  body: e.target.files[0],
-                                  headers: {
-                                    'Content-Type': '',
-                                  }
-                                });
-                                let image_url = put_url.split("?")[0]
-                                setPicture(image_url)
+                            <path
+                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                              strokeWidth={2}
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                          <div className="flex text-sm text-gray-600">
+                            <label
+                              htmlFor="file-upload"
+                              className="relative cursor-pointer bg-white/0 rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                            >
+                              <span
 
-                                // setSelectedFile(e.target.files[0])
-                              }}
-                              id="file-upload" name="file-upload" type="file" className="sr-only" />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
+                                onClick={() => fileInputRef.current.click()}>Upload a file</span>
+                              <input
+
+                                ref={fileInputRef}
+                                onChange={async (e) => {
+                                  handleFiles(e.target.files)
+
+
+                                  // setSelectedFile(e.target.files[0])
+                                }}
+                                id="file-upload" name="file-upload" type="file" className="sr-only" />
+                            </label>
+                            <p className="pl-1">or drag and drop</p>
+                          </div>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                         </div>
-                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                       </div>
-                    </div>
+                    </FileDrop>
                   </div>
                 }
 
@@ -182,17 +273,46 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                 </div>
 
 
-                <div className="mt-4">
+                {/* <div className="mt-4">
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                     onClick={() => {
+                      clearValues()
                       submitForm()
                       setIsOpen(false)
                     }}
                   >
                     Add Category
                   </button>
+                  
+                </div> */}
+                <div className="mt-4">
+                  {item ?
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={() => {
+                        submitEditForm()
+                        setIsOpen(false)
+                        clearValues()
+                      }}
+                    >
+                      Update Item
+                    </button>
+                    : <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={() => {
+                        submitForm()
+                        setIsOpen(false)
+                        clearValues()
+                      }}
+                    >
+                      Add Item
+                    </button>
+
+                  }
                 </div>
               </Dialog.Panel>
             </Transition.Child>

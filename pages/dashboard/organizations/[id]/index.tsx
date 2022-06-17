@@ -1,10 +1,12 @@
 import { Transition, Dialog } from '@headlessui/react'
 import { getCookie } from 'cookies-next'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import React, { useEffect, useState, Fragment } from 'react'
 
 
 const Organization = ({ id }) => {
+  const router = useRouter()
   const [user, setUser] = useState(null)
   const [organization, setOrganization] = useState(null)
   let [isOpen, setIsOpen] = useState(false)
@@ -37,13 +39,19 @@ const Organization = ({ id }) => {
           "Authorization": "Bearer " + getCookie("accessToken")
         }
       })
-      let data = await res.json()
-      data.organizations.filter((org) => {
-        if (org.id == id) {
-          setOrganization(org)
-        }
-      })
-      setUser(data)
+      if (res.status == 401) {
+        router.push("/")
+      }
+      else {
+        let data = await res.json()
+        data.organizations.filter((org) => {
+          if (org.id == id) {
+            setOrganization(org)
+          }
+        })
+        setUser(data)
+      }
+
     }
     fetchBranches()
     fetchUser()
