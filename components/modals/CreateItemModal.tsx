@@ -2,7 +2,7 @@ import { Dialog, Transition } from "@headlessui/react"
 import { getCookie } from "cookies-next"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from 'react-redux'
-import { setMenu, addItem,editItem } from '../../store/slices/menuSlice'
+import { setMenu, addItem, editItem } from '../../store/slices/menuSlice'
 import { FileDrop } from 'react-file-drop'
 import { useRouter } from "next/router"
 
@@ -18,6 +18,8 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
   const [outOfStock, setOutOfStock] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
 
   useEffect(() => {
     console.log(item)
@@ -42,16 +44,16 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       body: JSON.stringify({
         name,
         description,
-        "price":price,
+        "price": price,
         categoryId,
         picture: picture,
         outOfStock
       })
     })
-    
+
     let data = await res.json()
     dispatch(addItem({
-      id:data.id,
+      id: data.id,
       name,
       description,
       "price": price,
@@ -78,7 +80,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       picture: picture,
       outOfStock
     }))
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/"+item.id, {
+    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/" + item.id, {
       method: 'PATCH',
       headers: {
         "Authorization": "Bearer " + getCookie("accessToken"),
@@ -93,16 +95,17 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
         outOfStock
       })
     })
-    if(res.status==401){
+    if (res.status == 401) {
       router.push("/")
     }
-    else{
-    
-    console.log(res.statusText)
-  }
+    else {
+
+      console.log(res.statusText)
+    }
 
   }
   async function handleFiles(files) {
+    setIsLoading(true)
     let extension = files[0].name.split(".")[1]
     const formData = new FormData();
     let test = await fetch(process.env.NEXT_PUBLIC_API_URL + "organization/presigned-file-url?extension=" + extension, {
@@ -123,7 +126,9 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       }
     });
     let image_url = put_url.split("?")[0]
+    setIsLoading(false)
     setPicture(image_url)
+
   }
 
   function clearValues() {
@@ -226,7 +231,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                     <input
 
                       onChange={(e) => {
-                        setPrice(e.target.value)
+                        setPrice(parseInt(e.target.value))
                       }}
                       value={price}
                       autoComplete={'off'}
@@ -245,75 +250,86 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                     <img className="max-w-32 max-h-32 rounded-xl border shadow mt-1" src={picture}></img>
                   </>
                   :
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Cover photo</label>
-                    <FileDrop
-                      onDragOver={() => {
-                        setDragOver(true)
-                      }}
-                      onDragLeave={() => {
-                        setDragOver(false)
-                      }}
-                      onDrop={(files) => {
-                        handleFiles(files)
-                      }}>
-                      <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                        <div className="space-y-1 text-center">
-                          <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
-                            stroke="currentColor"
-                            fill="none"
-                            viewBox="0 0 48 48"
-                            aria-hidden="true"
-                          >
-                            <path
-                              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                              strokeWidth={2}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                          <div className="flex text-sm text-gray-600">
-                            <label
-                              htmlFor="file-upload"
-                              className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
-                            >
-                              <span>Upload a file</span>
-                              <input
-                                onChange={async (e) => {
-                                  const formData = new FormData();
-                                  let extension = e.target.files[0].name.split(".")[1]
-                                  let test = await fetch(process.env.NEXT_PUBLIC_API_URL + "organization/presigned-file-url?extension=" + extension, {
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                      'Authorization': 'Bearer ' + getCookie('accessToken'),
-                                      "Organization": id
-                                    }
-                                  })
-                                  let data = await test.json()
-                                  let put_url = data.url
-                                  formData.append('file', e.target.files[0]);
-                                  const response = await fetch(put_url, {
-                                    method: "PUT",
-                                    body: e.target.files[0],
-                                    headers: {
-                                      'Content-Type': '',
-                                    }
-                                  });
-                                  let image_url = put_url.split("?")[0]
-                                  setPicture(image_url)
+                  <>
+                    {isLoading ? 
+                    <svg role="status" className="w-16 my-2 h-16 mr-2  animate-spin dark:text-gray-200 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"></path>
+                      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"></path>
+                    </svg> :
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Cover photo</label>
+                        <FileDrop
+                          onDragOver={() => {
+                            setDragOver(true)
+                          }}
+                          onDragLeave={() => {
+                            setDragOver(false)
+                          }}
+                          onDrop={(files) => {
+                            handleFiles(files)
+                          }}>
+                          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                            <div className="space-y-1 text-center">
+                              <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 48 48"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                  strokeWidth={2}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              <div className="flex text-sm text-gray-600">
+                                <label
+                                  htmlFor="file-upload"
+                                  className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+                                >
+                                  <span>Upload a file</span>
+                                  <input
+                                    onChange={async (e) => {
+                                      setIsLoading(true)
+                                      const formData = new FormData();
+                                      let extension = e.target.files[0].name.split(".")[1]
+                                      let test = await fetch(process.env.NEXT_PUBLIC_API_URL + "organization/presigned-file-url?extension=" + extension, {
+                                        headers: {
+                                          'Content-Type': 'application/json',
+                                          'Authorization': 'Bearer ' + getCookie('accessToken'),
+                                          "Organization": id
+                                        }
+                                      })
+                                      let data = await test.json()
+                                      let put_url = data.url
+                                      formData.append('file', e.target.files[0]);
+                                      const response = await fetch(put_url, {
+                                        method: "PUT",
+                                        body: e.target.files[0],
+                                        headers: {
+                                          'Content-Type': '',
+                                        }
+                                      });
+                                      let image_url = put_url.split("?")[0]
+                                      setIsLoading(false)
+                                      setPicture(image_url)
 
-                                  // setSelectedFile(e.target.files[0])
-                                }}
-                                id="file-upload" name="file-upload" type="file" className="sr-only" />
-                            </label>
-                            <p className="pl-1">or drag and drop</p>
+                                      // setSelectedFile(e.target.files[0])
+                                    }}
+                                    id="file-upload" name="file-upload" type="file" className="sr-only" />
+                                </label>
+                                <p className="pl-1">or drag and drop</p>
+                              </div>
+                              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                        </div>
+                        </FileDrop>
                       </div>
-                    </FileDrop>
-                  </div>
+                    }
+                  </>
+
                 }
                 <div className='mt-2 flex'>
                   <label className="block text-sm font-medium text-gray-700">Out of stock</label>

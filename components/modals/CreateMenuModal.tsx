@@ -1,13 +1,16 @@
 import { Dialog, Transition } from "@headlessui/react"
 import { getCookie } from "cookies-next"
 import { Fragment, useState } from "react"
+import { SketchPicker } from 'react-color';
 
 export function CreateMenuModal({ fetchBranches,id,branchId, isOpen, setIsOpen }) {
     const [name, setName] = useState('')
     const [font, setFont] = useState('')
     const [fontSize, setFontSize] = useState("10")
-    const [fontColor, setFontColor] = useState('')
+    const [fontColor, setFontColor] = useState('#fff')
+    const [displayFontColorPicker, setDisplayFontColorPicker] = useState(false)
     const [backgroundColor, setBackgroundColor] = useState('')
+    const [displayBackgroundColorPicker, setDisplayBackgroundColorPicker] = useState(false)
     
     const [showData, setShowData] = useState(false)
   
@@ -123,12 +126,52 @@ export function CreateMenuModal({ fetchBranches,id,branchId, isOpen, setIsOpen }
                       />
                     </div>
                   </div>
-                  <div className='mt-2'>
+                  <div className='mt-2' onClick={()=>{
+                    if(displayFontColorPicker){
+                      // setDisplayFontColorPicker(false)
+                    }
+                  }}>
                     <div className="border border-gray-300 rounded-md px-2 mx-2 py-1 shadow-sm focus:outline-none">
                       <label htmlFor="name" className="block text-xs font-medium text-gray-900">
                         Font Color
                       </label>
-                      <input
+                      
+                      {displayFontColorPicker ? 
+                      <div className="relative " 
+                      // onClick={()=>{
+                      //   setDisplayFontColorPicker(true)
+                      // }}
+                      >
+                        <span 
+                        className=" p-1 my-2 bg-blue-200 hover:bg-blue-300 rounded-xl cursor-pointer" 
+                        onClick={()=>{
+                          console.log("Test")
+                          setDisplayFontColorPicker(false)
+                        }}>Select color</span>
+                      <div className="mt-2">
+                      <SketchPicker
+                      
+                      color={fontColor}
+                      onChangeComplete={(color) => {
+                        setFontColor(color.hex)
+                      }}
+                      ></SketchPicker>
+                      </div>
+                      </div>
+                      :
+                      <div
+                      className="p-1 rounded-xl cursor-pointer"
+                      style={{
+                        backgroundColor: fontColor,
+                      }}
+                      onClick={()=>{
+                        setDisplayFontColorPicker(true)
+                      }}
+                      >
+                        Pick a color {fontColor}
+                      </div>
+                      }
+                      {/* <input
                         onChange={(e) => {
                           setFontColor(e.target.value)
                         }}
@@ -138,7 +181,7 @@ export function CreateMenuModal({ fetchBranches,id,branchId, isOpen, setIsOpen }
                         id="fontColor"
                         className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
                         placeholder="red"
-                      />
+                      /> */}
                     </div>
                   </div>
                   <div className='mt-2'>
@@ -146,6 +189,41 @@ export function CreateMenuModal({ fetchBranches,id,branchId, isOpen, setIsOpen }
                       <label htmlFor="name" className="block text-xs font-medium text-gray-900">
                         Background Color
                       </label>
+                      {displayBackgroundColorPicker ? 
+                      <div className="relative " 
+                      // onClick={()=>{
+                      //   setDisplayFontColorPicker(true)
+                      // }}
+                      >
+                        <span 
+                        className=" p-1 my-2 bg-blue-200 hover:bg-blue-300 rounded-xl cursor-pointer" 
+                        onClick={()=>{
+                          setDisplayBackgroundColorPicker(false)
+                        }}>Select color</span>
+                      <div className="mt-2">
+                      <SketchPicker
+                      
+                      color={backgroundColor}
+                      onChangeComplete={(color) => {
+                        setBackgroundColor(color.hex)
+                      }}
+                      ></SketchPicker>
+                      </div>
+                      </div>
+                      :
+                      <div 
+                      style={{
+                        backgroundColor: backgroundColor,
+                      }}
+                      className="p-1 rounded-xl cursor-pointer"
+                      onClick={()=>{
+                        setDisplayBackgroundColorPicker(true)
+                      }}
+                      >
+                        Pick a color {backgroundColor}
+                      </div>
+                      }
+{/*                       
                       <input
                         onChange={(e) => {
                           setBackgroundColor(e.target.value)
@@ -156,7 +234,7 @@ export function CreateMenuModal({ fetchBranches,id,branchId, isOpen, setIsOpen }
                         id="backgroundColor"
                         className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
                         placeholder="black"
-                      />
+                      /> */}
                     </div>
                   </div>
                   <div className="mt-4">

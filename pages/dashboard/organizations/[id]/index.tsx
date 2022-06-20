@@ -3,6 +3,8 @@ import { getCookie } from 'cookies-next'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useState, Fragment } from 'react'
+import { ClipboardCheckIcon, ClipboardIcon } from '@heroicons/react/solid'
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 
 const Organization = ({ id }) => {
@@ -11,6 +13,7 @@ const Organization = ({ id }) => {
   const [organization, setOrganization] = useState(null)
   let [isOpen, setIsOpen] = useState(false)
   const [branches, setBranches] = useState([])
+  const [copied,setCopied] = useState(false)
 
   function closeModal() {
     setIsOpen(false)
@@ -75,13 +78,24 @@ const Organization = ({ id }) => {
           <div className='mt-4'>
             {branches.map((branch, index) => {
               return (
-                <Link href={`/dashboard/organizations/${organization.id}/branch/${branch.code}`}>
-                  <div key={index} className="p-4 shadow w-64 rounded-lg border cursor-pointer hover:bg-gray-50">
-                    <h1 className='font-semibold text-xl'>{branch.name}</h1>
-                    <h3>{branch.code}</h3>
-                    <h3></h3>
-                  </div>
-                </Link>
+                <div className='flex shadow w-64 rounded-lg border'>
+                  <Link href={`/dashboard/organizations/${organization.id}/branch/${branch.code}`}>
+                    <div key={index} className="p-4 w-10/12 hover:bg-gray-50 cursor-pointer ">
+                      <h1 className='font-semibold text-xl'>{branch.name}</h1>
+                      <h3>{branch.code}</h3>
+                    </div>
+
+                  </Link>
+                  <CopyToClipboard text={`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}
+                  onCopy={() => {
+                    setCopied(true)
+                  }}
+                  >
+                    {copied ? <ClipboardCheckIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardCheckIcon> : <ClipboardIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardIcon>}
+                  </CopyToClipboard>
+
+                </div>
+
               )
             })}
           </div>

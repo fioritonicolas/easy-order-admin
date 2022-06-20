@@ -75,7 +75,6 @@ const Code = ({ id, code }) => {
       {branch && <CreateMenuModal fetchBranches={fetchBranches} id={id} branchId={branch.id} isOpen={openMenuModal} setIsOpen={setOpenMenuModal}></CreateMenuModal>}
       {/* {branch && <CreateItemModal id={id} categoryId={null} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>} */}
       <DeleteDialog handleDelete={deleteBranch} isOpen={openDeleteModal} setIsOpen={setOpenDeleteModal}> </DeleteDialog>
-      <h1 className=' text-5xl font-bold'>Test</h1>
       <div className="max-w-7xl mt-8">
         <div className='flex'>
           <h1 className="text-3xl font-semibold text-gray-900">Menus</h1>
