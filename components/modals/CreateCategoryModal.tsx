@@ -5,6 +5,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { FileDrop } from 'react-file-drop'
 import { useDispatch } from "react-redux"
 import { editCategory } from '../../store/slices/menuSlice'
+import { XCircleIcon } from '@heroicons/react/outline'
 
 export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOpen, item, setItem }) {
   const router = useRouter()
@@ -18,6 +19,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
   const [dragOver, setDragOver] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef(null);
+  const [errorMessage,setErrorMessage] = useState("")
 
   const onFileInputChange = (event) => {
     const { files } = event.target;
@@ -62,6 +64,10 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
   }
 
   async function submitForm() {
+    if(name==""){
+      setErrorMessage("Name is required")
+      return
+    }
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category", {
       method: 'POST',
       headers: {
@@ -77,20 +83,22 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
         isRendered
       })
     })
-    let data = await res.json()
+    if(res.status==200){
+      
+      setIsOpen(false)
+      clearValues()
+      let data = await res.json()
     console.log(data)
     fetchBranches()
+    }
+    else{
+      let data = await res.json()
+      setErrorMessage(data.message)
+    }
+    
   }
   async function submitEditForm() {
-    dispatch(editCategory({
-      id: item.id,
-      name,
-      items: item.items,
-      description,
-      picture: picture,
-      isRendered,
-      sortOrder: item.sortOrder
-    }))
+
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category/" + item.id, {
       method: 'PATCH',
       headers: {
@@ -108,9 +116,23 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
     if (res.status == 401) {
       router.push("/")
     }
-    else {
+    else if(res.status == 200) {
+      dispatch(editCategory({
+        id: item.id,
+        name,
+        items: item.items,
+        description,
+        picture: picture,
+        isRendered,
+        sortOrder: item.sortOrder
+      }))
+      setIsOpen(false)
+      clearValues()
 
       console.log(res.statusText)
+    }
+    else {
+      setErrorMessage(res.statusText)
     }
 
   }
@@ -123,6 +145,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
     setName('')
     setDescription('')
     setIsRendered(false)
+    setErrorMessage("")
   }
 
   return (
@@ -161,6 +184,23 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                 >
                   Create a new category
                 </Dialog.Title>
+                {errorMessage && (
+                  <div className="rounded-md bg-red-50 p-4">
+                    <div className="flex">
+                      <div className="flex-shrink-0">
+                        <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-lg font-medium text-red-800">Error</h3>
+                        <div className="mt-2 text-sm text-red-700">
+                          <ul role="list" className="list-disc pl-5 space-y-1">
+                            <li>{errorMessage}</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className='mt-2'>
                   <div className="border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none">
                     <label htmlFor="name" className="block text-xs font-medium text-gray-900">
@@ -308,8 +348,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={() => {
                         submitEditForm()
-                        setIsOpen(false)
-                        clearValues()
+
                       }}
                     >
                       Update Item
@@ -319,8 +358,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={() => {
                         submitForm()
-                        setIsOpen(false)
-                        clearValues()
+
                       }}
                     >
                       Add Item

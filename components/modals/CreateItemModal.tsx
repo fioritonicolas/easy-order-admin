@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { setMenu, addItem, editItem } from '../../store/slices/menuSlice'
 import { FileDrop } from 'react-file-drop'
 import { useRouter } from "next/router"
+import { XCircleIcon } from "@heroicons/react/outline"
 
 
 export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
@@ -19,6 +20,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
   const [selectedFile, setSelectedFile] = useState(null)
   const [dragOver, setDragOver] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage,setErrorMessage] = useState("")
 
 
   useEffect(() => {
@@ -33,6 +35,10 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
 
 
   async function submitForm() {
+    if(!name){
+      setErrorMessage("Name is required")
+      return
+    }
     console.log(selectedFile)
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item", {
       method: 'POST',
@@ -50,7 +56,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
         outOfStock
       })
     })
-
+    if(res.status === 200){
     let data = await res.json()
     dispatch(addItem({
       id: data.id,
@@ -61,6 +67,13 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       picture: picture,
       outOfStock
     }))
+    setIsOpen(false)
+    clearValues()
+  }
+  else{
+    let data = await res.json()
+    setErrorMessage(data.message)
+  }
 
   }
   async function submitEditForm() {
@@ -71,15 +84,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       picture: picture,
       outOfStock
     })
-    dispatch(editItem({
-      id: item.id,
-      name,
-      description,
-      "price": price,
-      categoryId,
-      picture: picture,
-      outOfStock
-    }))
+
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/" + item.id, {
       method: 'PATCH',
       headers: {
@@ -98,9 +103,21 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
     if (res.status == 401) {
       router.push("/")
     }
-    else {
-
-      console.log(res.statusText)
+    else if(res.status == 200){
+      dispatch(editItem({
+        id: item.id,
+        name,
+        description,
+        "price": price,
+        categoryId,
+        picture: picture,
+        outOfStock
+      }))
+      setIsOpen(false)
+      clearValues()
+      
+    }else{
+      setErrorMessage(res.statusText)
     }
 
   }
@@ -141,6 +158,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
 
     setIsRendered(false)
     setSelectedFile(null)
+    setErrorMessage("")
   }
 
   return (
@@ -179,6 +197,24 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                 >
                   Create a new item
                 </Dialog.Title>
+                {errorMessage &&(
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-lg font-medium text-red-800">Error</h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <ul role="list" className="list-disc pl-5 space-y-1">
+                          <li>{errorMessage}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )
+                }
                 <div className='mt-2'>
                   <div className="border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none">
                     <label htmlFor="name" className="block text-xs font-medium text-gray-900">
@@ -348,8 +384,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={() => {
                         submitEditForm()
-                        setIsOpen(false)
-                        clearValues()
+
                       }}
                     >
                       Update Item
@@ -359,8 +394,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={() => {
                         submitForm()
-                        setIsOpen(false)
-                        clearValues()
+
                       }}
                     >
                       Add Item

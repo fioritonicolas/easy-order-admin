@@ -27,6 +27,8 @@ const Menu = ({ menu_name, id, code }) => {
   const [deleteItem, setDeleteItem] = useState(null)
   const [editedItem, setEditedItem] = useState(null)
   const [editedCategory, setEditedCategory] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [openAlertModal, setOpenAlertModal] = useState(false)
 
   async function editItem(item) {
     console.log(item)
@@ -53,7 +55,7 @@ const Menu = ({ menu_name, id, code }) => {
     if (res.status == 401) {
       router.push("/")
     }
-    else {
+    else if(res.status == 200) {
       let data = await res.json()
       console.log(data)
       let branches = data.branches
@@ -70,6 +72,11 @@ const Menu = ({ menu_name, id, code }) => {
         }
       })
     }
+    else{
+      let data = await res.json()
+      setErrorMessage(data.message)
+      setOpenAlertModal(true)
+    }
   }
   useEffect(() => {
     fetchBranches()
@@ -79,7 +86,7 @@ const Menu = ({ menu_name, id, code }) => {
     console.log("Deleting!")
     console.log(data)
     if (data.type == "menu") {
-      
+
       let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/" + data.item.id, {
         method: "DELETE",
         headers: {
@@ -89,9 +96,15 @@ const Menu = ({ menu_name, id, code }) => {
         }
       })
       let data_res = await result.status
-      console.log(data_res)
-      router.back()
+      if(data_res == 200) {
+        router.back()
       fetchBranches()
+      }
+      else{
+        let data = await result.json()
+        setErrorMessage(data.message)
+        setOpenAlertModal(true)
+      }      
     }
     else if (data.type == "category") {
       let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/category/" + data.item.id, {
@@ -111,7 +124,7 @@ const Menu = ({ menu_name, id, code }) => {
       console.log("Sending delete request!")
       console.log(data)
       let item_id = data.item.id
-      
+
       let result = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu/item/" + item_id, {
         method: "DELETE",
         headers: {
@@ -141,6 +154,15 @@ const Menu = ({ menu_name, id, code }) => {
         active: status
       })
     })
+    // console.log(res.status)
+    if (res.status == 200) {
+      setActive(!active)
+    }
+    else {
+      let data = await res.json()
+      setErrorMessage(data.message)
+      setOpenAlertModal(true)
+    }
   }
 
   return (
@@ -152,6 +174,7 @@ const Menu = ({ menu_name, id, code }) => {
             item={editedCategory}
             setItem={setEditedCategory}
             fetchBranches={fetchBranches} id={id} menuId={menu.id} isOpen={openCategoryModal} setIsOpen={setOpenCategoryModal}></CreateCategoryModal>
+            <ErrorAlert message={errorMessage} isOpen={openAlertModal} setIsOpen={setOpenAlertModal}></ErrorAlert>
           {deleteItem && <DeleteDialog data={deleteItem} handleDelete={handleDelete} isOpen={confirmDelete} setIsOpen={setConfirmDelete}></DeleteDialog>}
           <h1 className=' text-5xl font-bold'>{menu_name}</h1>
           <div className='flex mt-3'>
@@ -159,7 +182,7 @@ const Menu = ({ menu_name, id, code }) => {
               checked={active}
               onChange={() => {
                 updateMenuActive(!active)
-                setActive(!active)
+
               }}
               className={classNames(
                 active ? 'bg-indigo-600' : 'bg-gray-200',
@@ -289,6 +312,85 @@ export const getServerSideProps = async (ctx) => {
 }
 
 
+/* This example requires Tailwind CSS v2.0+ */
+
+export function ErrorAlert({ isOpen,setIsOpen,message }) {
+  return (
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" onClose={() => {
+        setIsOpen(false)
+      }}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                {/* <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  Error
+                </Dialog.Title> */}
+                {/* <Dialog.Description>
+                This will permanently deactivate your account
+              </Dialog.Description> */}
+
+                <div className="rounded-md bg-red-50 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-lg font-medium text-red-800">Error</h3>
+                      <div className="mt-2 text-sm text-red-700">
+                        <ul role="list" className="list-disc pl-5 space-y-1">
+                          <li>{message}</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className=" ml-2 inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    onClick={() => {
+                      setIsOpen(false)
+                    }}
+                  >
+                    Okay
+                  </button>
+                </div>
+
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition>
+
+  )
+}
+
 
 function DeleteDialog({ data, isOpen, setIsOpen, handleDelete }) {
   // Menu, item, category
@@ -367,3 +469,4 @@ function DeleteDialog({ data, isOpen, setIsOpen, handleDelete }) {
     </Transition>
   )
 }
+
