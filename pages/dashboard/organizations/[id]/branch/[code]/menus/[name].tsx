@@ -29,6 +29,7 @@ const Menu = ({ menu_name, id, code }) => {
   const [editedCategory, setEditedCategory] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [openAlertModal, setOpenAlertModal] = useState(false)
+  const [openMenuModal, setOpenMenuModal] = useState(false)
 
   async function editItem(item) {
     console.log(item)
@@ -169,6 +170,9 @@ const Menu = ({ menu_name, id, code }) => {
     <>
       {menu && (
         <div className='p-8'>
+          { branch &&
+          <CreateMenuModal menu={menu} setMenu={setMenu} branchId={branch.id} fetchBranches={fetchBranches} id={id} isOpen={openMenuModal} setIsOpen={setOpenMenuModal}></CreateMenuModal>
+        }
           <CreateItemModal id={id} item={editedItem} categoryId={categoryId} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>
           <CreateCategoryModal
             item={editedCategory}
@@ -212,6 +216,11 @@ const Menu = ({ menu_name, id, code }) => {
                     setConfirmDelete(true)
                   }}
                   className='cursor-pointer mb-2 text-xs md:text-lg ml-auto font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-1 px-2 md:p-2'>Delete Menu</button>
+                  <button
+                  onClick={() => {
+                    setOpenMenuModal(true)
+                  }}
+                  className='cursor-pointer mb-2 text-xs md:text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-1 px-2 md:p-2'>Edit Menu</button>
                 <button
                   onClick={() => {
                     setEditedCategory(null)

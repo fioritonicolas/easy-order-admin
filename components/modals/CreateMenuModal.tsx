@@ -1,10 +1,14 @@
 import { Dialog, Transition } from "@headlessui/react"
 import { getCookie } from "cookies-next"
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { SketchPicker } from 'react-color';
+import { setMenu, removeItem } from '../../store/slices/menuSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
-export function CreateMenuModal({ fetchBranches, id, branchId, isOpen, setIsOpen }) {
-  const [name, setName] = useState('')
+
+export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setIsOpen }) {
+  const dispatch = useDispatch()
+  const [name, setName] = useState("")
   const [font, setFont] = useState(fonts[0])
   const [fontSize, setFontSize] = useState("10")
   const [fontColor, setFontColor] = useState('#fff')
@@ -13,28 +17,62 @@ export function CreateMenuModal({ fetchBranches, id, branchId, isOpen, setIsOpen
   const [displayBackgroundColorPicker, setDisplayBackgroundColorPicker] = useState(false)
   // const [setFont, setSele] = useState(fonts[0])
   const [showData, setShowData] = useState(false)
+  const router = useRouter()
+
+  useEffect(()=>{
+    if(menu){
+      setName(menu.name)
+      setFont(menu.setting.font)
+      setFontSize(menu.setting.fontSize)
+      setFontColor(menu.setting.fontColor)
+      setBackgroundColor(menu.setting.backgroundColor)
+    }
+  },[])
 
   async function submitForm() {
     console.log(branchId)
-    let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu", {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + getCookie("accessToken"),
-        "Organization": id
-      },
-      body: JSON.stringify({
-        name,
-        "branchId": parseInt(branchId),
-        font,
-        fontSize,
-        fontColor,
-        backgroundColor
+    if(menu){
+      let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu" + "/" + menu.id, {
+        method: "PATCH",
+        headers: {
+          "Authorization": "Bearer " + getCookie("accessToken"),
+          "Content-Type": "application/json",
+          "Organization": id
+        },
+        body: JSON.stringify({
+          name: name,
+          font: font,
+          fontSize: fontSize,
+          fontColor: fontColor,
+          backgroundColor: backgroundColor
+        })
       })
-    })
-    let data = await res.json()
-    console.log(data)
-    fetchBranches()
+      if(res.status == 200){
+        router.push(`/dashboard/organizations/${id}/branch/${branchId}/menus/${name}`)
+        // fetchBranches()
+      }
+    }
+    else{
+      let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "menu", {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + getCookie("accessToken"),
+          "Organization": id
+        },
+        body: JSON.stringify({
+          name,
+          "branchId": parseInt(branchId),
+          font,
+          fontSize,
+          fontColor,
+          backgroundColor
+        })
+      })
+      let data = await res.json()
+      console.log(data)
+      fetchBranches()
+    }
   }
 
   return (
@@ -81,6 +119,7 @@ export function CreateMenuModal({ fetchBranches, id, branchId, isOpen, setIsOpen
                       onChange={(e) => {
                         setName(e.target.value)
                       }}
+                      value={name}
                       autoComplete="off"
                       type="text"
                       name="menuName"
@@ -265,6 +304,7 @@ export function CreateMenuModal({ fetchBranches, id, branchId, isOpen, setIsOpen
 
 import { Listbox } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
+import { useRouter } from "next/router";
 
 // const fonts = [
 //   { name: 'Roboto' },

@@ -23,7 +23,12 @@ const Code = ({ id, code }) => {
         "Organization": id
       }
     })
+    if(res.status == 401){
+      router.push("/")
+    }
+    else if(res.status === 200) {
     let data = await res.json()
+    console.log(data)
     let branches = data.branches
     let test = branches.forEach((branch) => {
       if (branch.code == code) {
@@ -32,6 +37,7 @@ const Code = ({ id, code }) => {
         console.log(branch)
       }
     })
+  }
   }
   useEffect(() => {
 
@@ -77,7 +83,16 @@ const Code = ({ id, code }) => {
       <DeleteDialog handleDelete={deleteBranch} isOpen={openDeleteModal} setIsOpen={setOpenDeleteModal}> </DeleteDialog>
       <div className="max-w-7xl mt-8">
         <div className='flex'>
-          <h1 className="text-3xl font-semibold text-gray-900">Menus</h1>
+          <div className=''>
+            <h1 className="text-3xl font-semibold text-gray-900">Menus</h1>
+            {branch && (
+              <a
+                className='text-indigo-500'
+                href={`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}>
+                {`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}
+              </a>
+            )}
+          </div>
           <div className='ml-auto flex flex-col'>
             <button
               onClick={() => {

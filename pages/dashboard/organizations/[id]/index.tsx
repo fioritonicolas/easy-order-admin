@@ -75,6 +75,7 @@ const Organization = ({ id }) => {
               }}
               className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new branch</button>
           </div>
+          {branches &&
           <div className='mt-4'>
             {branches.map((branch, index) => {
               return (
@@ -91,7 +92,15 @@ const Organization = ({ id }) => {
                     setCopied(true)
                   }}
                   >
-                    {copied ? <ClipboardCheckIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardCheckIcon> : <ClipboardIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardIcon>}
+                    {copied ? (
+                    <div className='my-auto p-1 text-sm text-center cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white mx-4 rounded-xl'>
+                    Link Copied
+                    </div>) : (
+                      <div className='my-auto p-1 text-sm text-center cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white mx-4 rounded-xl'>
+                      Copy Link
+                      </div>
+                    )}
+                    {/* {copied ? <ClipboardCheckIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardCheckIcon> : <ClipboardIcon className='ml-auto w-8 h-8 m-4 my-auto hover:bg-gray-200 p-1 rounded-xl cursor-pointer'></ClipboardIcon>} */}
                   </CopyToClipboard>
 
                 </div>
@@ -99,6 +108,7 @@ const Organization = ({ id }) => {
               )
             })}
           </div>
+          }
         </div>
       }
     </div>
