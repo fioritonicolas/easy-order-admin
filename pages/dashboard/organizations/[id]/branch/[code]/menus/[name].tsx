@@ -232,69 +232,141 @@ const Menu = ({ menu_name, id, code }) => {
             <div className='flex md:flex-row flex-col mt-4 '>
               {menu && menu.categories.map((category) => {
                 return (
-                  <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
-                    <div className='w-full flex'>
-                      <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
-                      <PencilAltIcon
-                        onClick={() => {
-                          editCategory(category)
-                        }}
-                        className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
-                      <XCircleIcon
-                        onClick={() => {
-                          setDeleteItem({
-                            "item": category,
-                            "type": "category"
-                          })
-                          setConfirmDelete(true)
-                        }}
-                        className='ml-auto my-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
-                    </div>
-                    {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
-                    <ul>
-                      {category.items.map((item) => {
-                        return (
-                          <div>
-                            <li className='flex'>
-                              <div className=' pt-2 pr-2'>
-                                <div className='font-semibold text-lg'>{item.name}</div>
+                  // <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
+                  //   <div className='w-full flex'>
+                  //     <h1 className='font-semibold text-xl w-1/2'>{category.name}</h1>
+                  //     <PencilAltIcon
+                  //       onClick={() => {
+                  //         editCategory(category)
+                  //       }}
+                  //       className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
+                  //     <XCircleIcon
+                  //       onClick={() => {
+                  //         setDeleteItem({
+                  //           "item": category,
+                  //           "type": "category"
+                  //         })
+                  //         setConfirmDelete(true)
+                  //       }}
+                  //       className='ml-auto my-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
+                  //   </div>
+                  //   {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
+                  //   <ul>
+                  //     {category.items.map((item) => {
+                  //       return (
+                  //         <div>
+                  //           <li className='flex'>
+                  //             <div className=' pt-2 pr-2'>
+                  //               <div className='font-semibold text-lg'>{item.name}</div>
 
-                              </div>
-                              <div className='flex pl-2 pt-2 pr-2 w-full'>
-                                <span className=' pt-0.5'>${item.price}</span>
-                                <PencilAltIcon
-                                  onClick={() => {
-                                    editItem(item)
-                                  }}
-                                  className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
-                                <XCircleIcon
-                                  onClick={() => {
-                                    console.log("Setting delete Item")
-                                    console.log(item)
-                                    setDeleteItem({
-                                      "item": item,
-                                      "type": "item"
-                                    })
-                                    setConfirmDelete(true)
-                                  }}
-                                  className='ml-1 w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
-                              </div>
-                            </li>
-                            <div className=''>{item.description}</div>
-                            <img src={item.picture} className="max-w-16 max-h-16"></img>
-                          </div>
-                        )
-                      })}
-                      <button
-                        onClick={() => {
-                          setCategoryId(category.id)
-                          setEditedItem(null)
-                          setOpenItemMenu(true)
-                        }}
-                        className='flex mt-2 bg-blue-100 p-1 rounded-lg'>
-                        <PlusCircleIcon className='w-6 h-6 my-auto mr-2'></PlusCircleIcon> Add an item</button>
-                    </ul>
+                  //             </div>
+                  //             <div className='flex pl-2 pt-2 pr-2 w-full'>
+                  //               <span className=' pt-0.5'>${item.price}</span>
+                  //               <PencilAltIcon
+                  //                 onClick={() => {
+                  //                   editItem(item)
+                  //                 }}
+                  //                 className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
+                  //               <XCircleIcon
+                  //                 onClick={() => {
+                  //                   console.log("Setting delete Item")
+                  //                   console.log(item)
+                  //                   setDeleteItem({
+                  //                     "item": item,
+                  //                     "type": "item"
+                  //                   })
+                  //                   setConfirmDelete(true)
+                  //                 }}
+                  //                 className='ml-1 w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'></XCircleIcon>
+                  //             </div>
+                  //           </li>
+                  //           <div className=''>{item.description}</div>
+                  //           <img src={item.picture} className="max-w-16 max-h-16"></img>
+                  //         </div>
+                  //       )
+                  //     })}
+                  //     <button
+                  //       onClick={() => {
+                  //         setCategoryId(category.id)
+                  //         setEditedItem(null)
+                  //         setOpenItemMenu(true)
+                  //       }}
+                  //       className='flex mt-2 bg-blue-100 p-1 rounded-lg'>
+                  //       <PlusCircleIcon className='w-6 h-6 my-auto mr-2'></PlusCircleIcon> Add an item</button>
+                  //   </ul>
+                  // </div>
+                  <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
+                  <div className='w-full flex'>
+                    <h1 className=' font-semibold text-xl w-1/2'>{category.name}</h1>
+                    <div className='ml-auto flex'>
+                    <PencilAltIcon
+                      onClick={() => {
+                        editCategory(category)
+                      }}
+                      className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'></PencilAltIcon>
+                    <XCircleIcon
+                      onClick={() => {
+                        setDeleteItem({
+                          "item": category,
+                          "type": "category"
+                        })
+                        setConfirmDelete(true)
+                      }}
+                      className='ml-auto w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'>
+                        
+                      </XCircleIcon>
+                    </div>
                   </div>
+                  {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
+                  <ul>
+                    {category.items.map((item) => {
+                      return (
+                        <div>
+                          <li className='grid grid-cols-4'>
+                            <div className=' col-span-2 pt-2 pr-2'>
+                              <div className='font-semibold text-lg'>{item.name}</div>
+
+                            </div>
+                            <div className='ml-auto pt-2 pr-2'>
+                              <span className=' pt-0.5'>${item.price}</span>
+                            </div>
+                            <div className='ml-auto inline mt-2'>
+                              <PencilAltIcon
+                                onClick={() => {
+                                  editItem(item)
+                                }}
+                                className='ml-auto w-5 h-5 cursor-pointer text-indigo-400 hover:text-indigo-500'>
+                                </PencilAltIcon>
+                              <XCircleIcon
+                                onClick={() => {
+                                  console.log("Setting delete Item")
+                                  console.log(item)
+                                  setDeleteItem({
+                                    "item": item,
+                                    "type": "item"
+                                  })
+                                  setConfirmDelete(true)
+                                }}
+                                className='ml-1 w-5 h-5 cursor-pointer text-red-400 hover:text-red-500'>
+
+                                </XCircleIcon>
+                              </div>
+                          </li>
+                          <div className=''>{item.description}</div>
+                          <img src={item.picture} className="max-w-16 max-h-16"></img>
+                        </div>
+                      )
+                    })}
+                    <button
+                      onClick={() => {
+                        setCategoryId(category.id)
+                        setEditedItem(null)
+                        setOpenItemMenu(true)
+                      }}
+                      className='flex mt-2 bg-blue-100 p-1 rounded-lg'>
+                      <PlusCircleIcon className='w-6 h-6 my-auto mr-2'></PlusCircleIcon> Add an item</button>
+                  </ul>
+                </div>
                 )
               })}
             </div>
