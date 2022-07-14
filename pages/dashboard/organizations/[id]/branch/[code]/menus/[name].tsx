@@ -165,6 +165,17 @@ const Menu = ({ menu_name, id, code }) => {
       setOpenAlertModal(true)
     }
   }
+  function sortItems(items){
+    let new_arr = [...items]
+    console.log("items", items)
+    // Sort items by sortOrder
+    new_arr.sort((a, b) => {
+        return a.sortOrder - b.sortOrder
+    }
+    )
+    return new_arr
+
+}
 
   return (
     <>
@@ -257,7 +268,7 @@ const Menu = ({ menu_name, id, code }) => {
                   </div>
                   {category.picture && <img src={category.picture} className="w-16 h-16 rounded-xl border shadow-sm"></img>}
                   <ul>
-                    {category.items.map((item) => {
+                    {sortItems(category.items).map((item) => {
                       return (
                         <div>
                           <li className='grid grid-cols-4'>

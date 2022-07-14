@@ -21,6 +21,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
   const [dragOver, setDragOver] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage,setErrorMessage] = useState("")
+  const [sortOrder, setSortOrder] = useState(0)
 
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       setDescription(item.description)
       setPicture(item.picture)
       setPrice(item.price)
+      setSortOrder(item.sortOrder)
     }
   }, [item])
 
@@ -53,7 +55,8 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
         "price": price,
         categoryId,
         picture: picture,
-        outOfStock
+        outOfStock,
+        sortOrder
       })
     })
     if(res.status === 200){
@@ -65,7 +68,8 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
       "price": price,
       categoryId,
       picture: picture,
-      outOfStock
+      outOfStock,
+      sortOrder
     }))
     setIsOpen(false)
     clearValues()
@@ -97,7 +101,8 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
         description,
         "price": price,
         picture: picture,
-        outOfStock
+        outOfStock,
+        sortOrder
       })
     })
     if (res.status == 401) {
@@ -111,7 +116,8 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
         "price": price,
         categoryId,
         picture: picture,
-        outOfStock
+        outOfStock,
+        sortOrder
       }))
       setIsOpen(false)
       clearValues()
@@ -150,6 +156,7 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
 
   function clearValues() {
     setName('')
+    setSortOrder(0)
     setDescription('')
     setPicture(null)
     setPrice(10)
@@ -374,6 +381,26 @@ export function CreateItemModal({ id, categoryId, isOpen, setIsOpen, item }) {
                       setOutOfStock(outOfStock!)
                     }}
                     className='ml-2 my-auto' type="checkbox" />
+                </div>
+                <div className='mt-2 flex'>
+                <div className="border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none">
+                    <label htmlFor="name" className="block text-xs font-medium text-gray-900">
+                      Sort Order
+                    </label>
+                    <input
+
+                      onChange={(e) => {
+                        setSortOrder(parseInt(e.target.value))
+                      }}
+                      value={sortOrder}
+                      autoComplete={'off'}
+                      type="number"
+                      name="sortOrder"
+                      id="sortOrder"
+                      className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
+                      placeholder={sortOrder}
+                    />
+                  </div>
                 </div>
 
 

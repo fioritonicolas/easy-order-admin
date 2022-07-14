@@ -15,6 +15,7 @@ export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setI
   const [displayFontColorPicker, setDisplayFontColorPicker] = useState(false)
   const [backgroundColor, setBackgroundColor] = useState('')
   const [displayBackgroundColorPicker, setDisplayBackgroundColorPicker] = useState(false)
+  const [collapseCategories, setCollapseCategories] = useState(false)
   // const [setFont, setSele] = useState(fonts[0])
   const [showData, setShowData] = useState(false)
   const router = useRouter()
@@ -26,6 +27,7 @@ export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setI
       setFontSize(menu.setting.fontSize)
       setFontColor(menu.setting.fontColor)
       setBackgroundColor(menu.setting.backgroundColor)
+      setCollapseCategories(menu.collapseCategories)
     }
   },[])
 
@@ -44,7 +46,8 @@ export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setI
           font: font,
           fontSize: fontSize,
           fontColor: fontColor,
-          backgroundColor: backgroundColor
+          backgroundColor: backgroundColor,
+          collapseCategories: collapseCategories
         })
       })
       if(res.status == 200){
@@ -66,7 +69,8 @@ export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setI
           font,
           fontSize,
           fontColor,
-          backgroundColor
+          backgroundColor,
+          collapseCategories: collapseCategories
         })
       })
       let data = await res.json()
@@ -266,19 +270,20 @@ export function CreateMenuModal({ menu,fetchBranches, id, branchId, isOpen, setI
                         Pick a color {backgroundColor}
                       </div>
                     }
-                    {/*                       
-                      <input
-                        onChange={(e) => {
-                          setBackgroundColor(e.target.value)
-                        }}
-                        autoComplete="off"
-                        type="text"
-                        name="backgroundColor"
-                        id="backgroundColor"
-                        className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
-                        placeholder="black"
-                      /> */}
+                    
                   </div>
+                  <div className="my-auto ">
+                  <input 
+                  id="default-checkbox"
+                  type="checkbox" 
+                  onClick={()=>{
+                    setCollapseCategories(!collapseCategories)
+                  }}
+                  checked={collapseCategories}
+                  className=" ml-2 mt-3 w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"/>
+                  <label className=" ml-2">Collapse Categories</label>
+                  </div>
+                 
                 </div>
                 <div className="mt-4">
                   <button
