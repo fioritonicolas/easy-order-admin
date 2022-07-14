@@ -20,7 +20,8 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
   const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef(null);
   const [errorMessage,setErrorMessage] = useState("")
-
+  const [sortOrder, setSortOrder] = useState(0)
+  
   const onFileInputChange = (event) => {
     const { files } = event.target;
     // do something with your files...
@@ -33,6 +34,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
       setDescription(item.description)
       setPicture(item.picture)
       setIsRendered(item.isRendered)
+      setSortOrder(item.sortOrder)
       // setPrice(item.price)
     }
   }, [item])
@@ -80,7 +82,8 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
         description,
         menuId,
         picture: picture,
-        isRendered
+        isRendered,
+        sortOrder
       })
     })
     if(res.status==200){
@@ -110,7 +113,8 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
         name,
         description,
         picture: picture,
-        isRendered
+        isRendered,
+        sortOrder
       })
     })
     if (res.status == 401) {
@@ -124,7 +128,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
         description,
         picture: picture,
         isRendered,
-        sortOrder: item.sortOrder
+        sortOrder: sortOrder
       }))
       setIsOpen(false)
       clearValues()
@@ -146,6 +150,7 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
     setDescription('')
     setIsRendered(false)
     setErrorMessage("")
+    setSortOrder(0)
   }
 
   return (
@@ -324,6 +329,26 @@ export function CreateCategoryModal({ fetchBranches, id, menuId, isOpen, setIsOp
                       setRendered(rendered!)
                     }}
                     className='ml-2 my-auto' type="checkbox" />
+                </div>
+                <div className='mt-2 flex'>
+                <div className="border border-gray-300 rounded-md px-2 py-1 shadow-sm focus:outline-none">
+                    <label htmlFor="name" className="block text-xs font-medium text-gray-900">
+                      Sort Order
+                    </label>
+                    <input
+
+                      onChange={(e) => {
+                        setSortOrder(parseInt(e.target.value))
+                      }}
+                      value={sortOrder}
+                      autoComplete={'off'}
+                      type="number"
+                      name="sortOrder"
+                      id="sortOrder"
+                      className="block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 focus:outline-none sm:text-sm"
+                      placeholder={sortOrder}
+                    />
+                  </div>
                 </div>
 
 

@@ -167,12 +167,13 @@ const Menu = ({ menu_name, id, code }) => {
   }
   function sortItems(items){
     let new_arr = [...items]
-    console.log("items", items)
+    console.log("category", items)
     // Sort items by sortOrder
     new_arr.sort((a, b) => {
         return a.sortOrder - b.sortOrder
     }
     )
+    console.log("New array", new_arr)
     return new_arr
 
 }
@@ -241,7 +242,7 @@ const Menu = ({ menu_name, id, code }) => {
               </div>
             </div>
             <div className=' grid grid-cols-3 mt-4 '>
-              {menu && menu.categories.map((category) => {
+              {menu && sortItems(menu.categories).map((category) => {
                 return (
                  
                   <div className=' p-4 shadow w-64 rounded-lg border mt-4 md:mx-4 mx-auto '>
