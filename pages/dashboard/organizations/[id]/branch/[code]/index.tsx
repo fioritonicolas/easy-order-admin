@@ -88,8 +88,8 @@ const Code = ({ id, code }) => {
             {branch && (
               <a
                 className='text-indigo-500'
-                href={`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}>
-                {`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}
+                href={`${process.env.NEXT_PUBLIC_MENU_URL}/${branch.name}/${branch.code}`}>
+                {`${process.env.NEXT_PUBLIC_MENU_URL}/${branch.name}/${branch.code}`}
               </a>
             )}
           </div>

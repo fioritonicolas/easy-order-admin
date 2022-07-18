@@ -13,7 +13,7 @@ const Branch = ({ branch, organization, index }) => {
                 </div>
 
             </Link>
-            <CopyToClipboard text={`https://easy-order-menu.vercel.app/${branch.name}/${branch.code}`}
+            <CopyToClipboard text={`${process.env.NEXT_PUBLIC_MENU_URL}/${branch.name}/${branch.code}`}
                 onCopy={() => {
                     setCopied(true)
                 }}
