@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { CreateCategoryModal } from '../../../../../../components/modals/CreateCategoryModal'
 import { CreateMenuModal } from '../../../../../../components/modals/CreateMenuModal'
 import { CreateItemModal } from '../../../../../../components/modals/CreateItemModal'
+import { CreateBranchModal } from '../..'
 import Link from 'next/link'
 
 const Code = ({ id, code }) => {
@@ -15,6 +16,10 @@ const Code = ({ id, code }) => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false)
   const [branch, setBranch] = useState(null)
   const [menus, setMenus] = useState(null)
+  const [branches, setBranches] = useState(null)
+
+  const [editMenu, setEditMenu] = useState(false)
+
   async function fetchBranches() {
     let res = await fetch(process.env.NEXT_PUBLIC_API_URL + "branch", {
       headers: {
@@ -73,6 +78,9 @@ const Code = ({ id, code }) => {
       router.back()
     }
   }
+  
+  
+  
 
 
   return (
@@ -81,6 +89,7 @@ const Code = ({ id, code }) => {
       {branch && <CreateMenuModal fetchBranches={fetchBranches} id={id} branchId={branch.id} isOpen={openMenuModal} setIsOpen={setOpenMenuModal}></CreateMenuModal>}
       {/* {branch && <CreateItemModal id={id} categoryId={null} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>} */}
       <DeleteDialog handleDelete={deleteBranch} isOpen={openDeleteModal} setIsOpen={setOpenDeleteModal}> </DeleteDialog>
+      <CreateBranchModal editBranch={branch} setBranches={fetchBranches}  id={id} isOpen={editMenu} setIsOpen={setEditMenu}></CreateBranchModal>
       <div className="max-w-7xl mt-8">
         <div className='flex'>
           <div className=''>
@@ -99,6 +108,11 @@ const Code = ({ id, code }) => {
                 setOpenDeleteModal(true)
               }}
               className='cursor-pointer mb-2 text-lg font-semibold text-white bg-red-700 hover:bg-red-600 rounded-xl p-2 outline-none'>Delete Branch</button>
+              <button
+              onClick={() => {
+                setEditMenu(true)
+              }}
+              className='cursor-pointer mb-2 text-lg font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Edit Menu</button>
             <button
               onClick={() => {
                 setOpenMenuModal(true)
@@ -118,22 +132,6 @@ const Code = ({ id, code }) => {
           })}
         </div>
       </div>
-      {/* <div className="flex max-w-7xl mt-8">
-        <h1 className="text-3xl font-semibold text-gray-900">Categories</h1>
-        <button
-          onClick={() => {
-            setOpenCategoryModal(true)
-          }}
-          className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new Category</button>
-      </div>
-      <div className="flex max-w-7xl mt-8">
-        <h1 className="text-3xl font-semibold text-gray-900">Items</h1>
-        <button
-          onClick={() => {
-            setOpenItemMenu(true)
-          }}
-          className='cursor-pointer text-lg ml-auto font-semibold text-white bg-indigo-700 hover:bg-indigo-600 rounded-xl p-2'>Create a new Item</button>
-      </div> */}
 
 
 

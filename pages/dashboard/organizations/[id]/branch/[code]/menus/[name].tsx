@@ -185,7 +185,7 @@ const Menu = ({ menu_name, id, code }) => {
           { branch &&
           <CreateMenuModal menu={menu} setMenu={setMenu} branchId={branch.id} fetchBranches={fetchBranches} id={id} isOpen={openMenuModal} setIsOpen={setOpenMenuModal}></CreateMenuModal>
         }
-          <CreateItemModal id={id} item={editedItem} categoryId={categoryId} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>
+          <CreateItemModal id={id} item={editedItem} setItem={setEditedItem} categoryId={categoryId} isOpen={openItemMenu} setIsOpen={setOpenItemMenu}></CreateItemModal>
           <CreateCategoryModal
             item={editedCategory}
             setItem={setEditedCategory}
